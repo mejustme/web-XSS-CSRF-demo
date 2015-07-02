@@ -2,6 +2,6 @@ var http = require('http');
 var port = 18080;
 http.createServer(function(req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write('<h1>Á¬Ğø</h1>');
-    res.end('<p>ÎÒÒªÍæ×ª node Óë mongodb !</p>');
+    res.write('<h1>è¿ç»­</h1>');
+    res.end('<p>æˆ‘è¦ç©è½¬ node ä¸ mongodb !</p>');
 }).listen(port);
