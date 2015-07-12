@@ -12,7 +12,8 @@
     },
     "devDependencies": {
         "ejs": "^2.3.2",
-        "grunt": "^0.4.5"
+        "grunt": "^0.4.5",
+        "mongoose" : "~4.0.7"
     }
 }
 
