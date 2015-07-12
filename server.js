@@ -12,7 +12,14 @@ app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口
 
 app.use(express.static(__dirname + '/public'));  // express 管理静态资源分发  __dirname 正在执行的脚本目录
 
-mongoose.connect("mongodb://localhost:27017/bea"); // 连接数据库bea
+// mongodb协议默认端口就是27017 同http为80
+mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ", function(err){
+    if(!err){
+        console.log("成功连接数据库")
+    }else{
+        throw err;
+    }
+}); // 连接数据库bea
 
 var fortuneCookies = [
     "苹果",
@@ -34,12 +41,27 @@ app.get('/prize', function(req,res){
 });
 
 app.get('/blog', function(req,res){
-    var Blog = require('blog');
+    var Blog = require('./js/blog');
     var blogList = [];
     Blog.find(function(err, blogs){
-         blogList = blogs;
+        var  tempArr =[];
+        tempArr = blogs.map(function(blog){
+             // 不知道为什么blog.date = blog.date.toString().match(/\d+:\d+:\d+/)[0];无效
+             var  tempBlog = {}; //必须放里面，每次创造一个新的，否则数组中都是指向同一个的引用
+             tempBlog.title = blog.title;
+             tempBlog.content = blog.content;
+             tempBlog.date =  blog.date.toString().match(/\d+:\d+:\d+/)[0];
+             tempBlog.visited = blog.visited;
+             tempArr.push(tempBlog);
+             //match非全局匹配  返回的是数组[结果，正则表达式子表达式，index,原值]
+             //match全局匹/g ,返回也是数组，只有多个全匹配结果
+             //return blog; 必须返回该值才改变
+             return tempBlog;
+         });
+         //console.log(tempArr)
+         res.render('blog', { blogs: tempArr }); //必须放回调里！异步
     });
-    res.render('blog', { blogs: blogList });
+    //res.render('blog', { blogs: blogList });
 });
 
 app.get('/505', function(req,res){

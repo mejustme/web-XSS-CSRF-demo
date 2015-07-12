@@ -2,14 +2,14 @@
 
 <p>我的博客</p>
 <div>
-    {{#blogs}}
+    {{#each blogs}}
         <div>
             <h3>{{title}}</h3>
             <p>{{content}}</p>
             <footer>
-                <span class="date">{{date}}</span>
-                <span class="visited">{{visited}}</span>
+               时间： <span class="date">{{date}}</span>
+               访问数：<span class="visited">{{visited}}</span>
             </footer>
         </div>
-    {{/blogs}}
+    {{/each}}
 </div>
