@@ -8,12 +8,13 @@ var handlebars = require('express3-handlebars') //  映入handlebar
 app.engine('handlebars', handlebars.engine);  //添加引擎
 app.set('view engine', 'handlebars');  // 设置引擎
 
-app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口
+app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口express 服务器端口
 
 app.use(express.static(__dirname + '/public'));  // express 管理静态资源分发  __dirname 正在执行的脚本目录
 
 // mongodb协议默认端口就是27017 同http为80
-mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ", function(err){
+//mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ", function(err){
+mongoose.connect("mongodb://localhost:27017/bea", function(err){
     if(!err){
         console.log("成功连接数据库")
     }else{
