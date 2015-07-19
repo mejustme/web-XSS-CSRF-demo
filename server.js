@@ -2,7 +2,6 @@ var express = require('express');  // 引入express模块
 var mongoose = require('mongoose'); //引入mongodb ODM 对象文档映射
 var app = express();
 
-// set up handlebars view engine
 var handlebars = require('express3-handlebars') //  映入handlebar
     .create({
         defaultLayout:'indexLayout',
@@ -14,14 +13,14 @@ var handlebars = require('express3-handlebars') //  映入handlebar
             }
         }
     });
+
 app.engine('handlebars', handlebars.engine);  //添加引擎
 app.set('view engine', 'handlebars');  // 设置引擎
 
 app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口express 服务器端口
-
 // mongodb协议默认端口就是27017 同http为80
 //mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ", function(err){
-mongoose.connect("mongodb://localhost:27017/bea", function(err){
+mongoose.connect("mongodb://localhost:27017/bae", function(err){
     if(!err){
         console.log("成功连接数据库")
     }else{
@@ -30,7 +29,10 @@ mongoose.connect("mongodb://localhost:27017/bea", function(err){
 }); // 连接数据库bea
 
 app.use(express.static(__dirname + '/public'));  // express 管理静态资源分发  __dirname 正在执行的脚本目录
-app.use(require('cookie-parser')("cookieSecret12345"));  // 私钥,签名 必须是要引入cookie中间件
+var cookieParser = require('cookie-parser');
+var mySecret = "cookieSecret12345"
+app.use(cookieParser(mySecret));  // 私钥,签名 必须是要引入cookie中间件
+
 app.use(require('body-parser')());
 
 app.get('/', function(req,res){
@@ -67,42 +69,92 @@ app.use('/login', function(req,res){
     res.set('Access-Control-Allow-Origin', req.headers.origin);   ////允许当前页面，那返回的信息
     res.set('Access-Control-Allow-Credentials', true);  //允许当前页面，拿返回的cookie (这时 不可用用* 匹配 Allow-Origin)
     res.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
-    var account = req.body.account;
-    var password = req.body.password;
-    if( account == '8596' && password == "CHEN"){
-        res.cookie('account',account,{signed: true, httpOnly: true});
-        res.cookie('password',password,{signed: true, httpOnly: true});
-        res.json({
-            state: "loginSuccess",
-            href : "http://mejustme.duapp.com:18080/comment"
-        })
-    }else{
-        /* res.type('text/plain');*/
-        /*res.send("密码错误");*/
-        if(account == '859652049'){
-            res.json({
-                state: "pwdError",
-                msg : "密码错误"
-            })
+    var inputAccount = req.body.account;
+    var inputPassword = req.body.password;
+
+    var Users = require('./serve-js/users');
+    Users.find({account: inputAccount}, function(err, users){
+        if(users.length == 1){
+            if(users[0].password === inputPassword){
+                res.cookie('account',inputAccount,{signed: true, httpOnly: true});
+                res.cookie('password',inputPassword,{signed: true, httpOnly: true});
+                res.json({
+                    action: "login",
+                    state: "loginSuccess",
+                    href : "http://mejustme.duapp.com:18080/comment"
+                })
+            }else{
+                res.json({
+                    action: "login",
+                    state: "pwdError",
+                    msg : "密码错误"
+                })
+            }
         }else{
             res.json({
+                action: "login",
                 state: "accountError",
                 msg : "账号不存在"
             })
         }
+    });
 
-    }
 });
 
 app.use('/signup', function(req,res){
+    res.set('Access-Control-Allow-Origin', req.headers.origin);   ////允许当前页面，那返回的信息
+    res.set('Access-Control-Allow-Credentials', true);  //允许当前页面，拿返回的cookie (这时 不可用用* 匹配 Allow-Origin)
+    res.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+    var inputAccount = req.body.account;
+    var inputPassword = req.body.password;
+    var Users = require('./serve-js/users');
+    Users.find({account: inputAccount}, function(err, users){
+        if(users.length == 1){
+            res.json({
+                action: "signup",
+                state: "accountError",
+                msg: "账号已存在"
+            })
 
+        }else{
+            var newUser = new Users();
+            newUser.account = inputAccount;
+            newUser.password = inputPassword;
+            newUser.save(function(err){
+                if(err){
+                    res.json({
+                        action: "signup",
+                        state: "signupError",
+                        msg: "注册失败"
+                    })
+                }
+                res.json({
+                    action: "signup",
+                    state: "signupSuccess",
+                    msg: "注册成功,请登录"
+                })
+            })
+
+        }
+    });
 });
 
 app.use('/comment', function(req,res){
-    for(var key in req.signedCookies){  // cookies 与signedCookies
-        console.log(key + req.signedCookies[key]);
-    }
-    res.render('comment', { layout: 'indexLayout' ,title: '评论'});
+    var inputSignedAccount = req.signedCookies.account;
+    var inputSignedPassword = req.signedCookies.password;
+    var inputAccount = cookieParser.signedCookie(inputSignedAccount,mySecret);
+    var inputPassword = cookieParser.signedCookie(inputSignedPassword,mySecret);
+    console.log(inputAccount);
+    console.log(inputPassword);
+    var Users = require('./serve-js/users');
+    Users.find({account: inputAccount},function(err,users){
+        if(users.length == 1 && users[0].password == inputPassword){
+            res.render('comment', { layout: 'indexLayout' ,title: '评论'});
+        }else{
+            res.redirect(303,'/');
+        }
+    })
+
 });
 
 
@@ -122,10 +174,6 @@ app.use('/ajax', function(req,res){
     var account = req.body.account;
     var password = req.body.password;
     // res.send("you account:" + account +'\n' + "you password:" + password);
-});
-
-app.get('/505', function(req,res){
-    res.render('nothing');  //故意产生内部错误，返回505页面
 });
 
 // 404 catch-all handler (middleware)

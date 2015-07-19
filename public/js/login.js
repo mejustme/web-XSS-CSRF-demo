@@ -42,32 +42,54 @@ $('.tab a').on('click', function (e) {
 
 });
 
+var canlogin = true;
 
 $('.signup-button, .login-button').on('click',function(){
-    console.log($(this).parent('form').serialize());
-    console.log($(this).attr('class'));
-    $.ajax({
-        type: "POST",
-        url: "http://mejustme.duapp.com:18080/login",
-        dataType: 'json',
-        data: $(this).parent('form').serialize(),
-        xhrFields: {
-            withCredentials: true  // 让ajax 跨域带上cookie  默认不带
-        },
-        success: function(msg){
-           if(msg.state == 'pwdError'){
-               alert(msg.msg + "认真输入密码");
-           }else if(msg.state == 'accountError'){
-               alert(msg.msg + "认真输入账号");
-           }else if(msg.state == 'loginSuccess'){
-               console.log(msg);
-               location.href = msg.href;
-           }
-        },
-        error: function(){
-            alert(msg)
-        }
+   if(canlogin){
+       var action = $(this).hasClass('login-button') ? "login" : "signup";
+       $.ajax({
+           type: "POST",
+           url: "http://mejustme.duapp.com:18080/" + action,
+           dataType: 'json',
+           data: $(this).parent('form').serialize(),
+           xhrFields: {
+               withCredentials: true  // 让ajax 跨域带上cookie  默认不带
+           },
+           success: function(msg){
+               if(msg.action == 'login'){
+                  if(msg.state == 'loginSuccess'){
+                       location.href = msg.href;
+                   }else{
+                       inform('login',msg.msg);
+                   }
+               }else if(msg.action == 'signup'){
+                   inform('signup',msg.msg);
+               }
 
-    })
+           },
+           error: function(){
+               alert(msg)
+           }
+
+       });
+
+   }
     return false;
 });
+
+function inform(action, content){
+    var $h1 = $("#" + action).find('h1');
+    var textOld = $h1.text();
+    canlogin = false ; //防止 在更改文字状态重复提交
+    if(action == 'login'){
+        $h1.text(content).css('color','#f5af08').fadeOut(2500,function(){
+
+            $h1.text(textOld).css('color',"#fff").fadeIn(500);
+            canlogin = true ;
+        });
+    }else{
+        $h1.text(content).css('color','#f5af08');
+        canlogin = true ;
+    }
+
+}

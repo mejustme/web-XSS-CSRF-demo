@@ -1,5 +1,6 @@
-{{#section 'index-css'}}
+{{#section 'index-css'}}  <!--自定义不同段落-->
     <link rel="stylesheet" href="/css/login.css"/>
+    {{> toast-css}}  <!--引入组件-->
 {{/section}}
 
 {{#section 'head'}}
@@ -68,6 +69,8 @@
     </div><!-- tab-content -->
 
 </div> <!-- /form -->
+
+{{> toast-html}}
 
 {{#section 'index-script'}}
     <script src="/js/jquery.js" charset="utf-8"></script>
