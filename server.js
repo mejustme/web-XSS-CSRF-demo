@@ -4,13 +4,20 @@ var app = express();
 
 // set up handlebars view engine
 var handlebars = require('express3-handlebars') //  映入handlebar
-    .create({ defaultLayout:'main' });  //默认布局view/layout中 main, 必须在layout中
+    .create({
+        defaultLayout:'indexLayout',
+        helpers: {                    //helpers,有s, 是section辅助函数
+            section: function(name, options){
+                if(!this._sections) this._sections = {};
+                this._sections[name] = options.fn(this);
+                return null;
+            }
+        }
+    });
 app.engine('handlebars', handlebars.engine);  //添加引擎
 app.set('view engine', 'handlebars');  // 设置引擎
 
 app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口express 服务器端口
-
-app.use(express.static(__dirname + '/public'));  // express 管理静态资源分发  __dirname 正在执行的脚本目录
 
 // mongodb协议默认端口就是27017 同http为80
 //mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ", function(err){
@@ -22,27 +29,17 @@ mongoose.connect("mongodb://localhost:27017/bea", function(err){
     }
 }); // 连接数据库bea
 
-var fortuneCookies = [
-    "苹果",
-    "书包",
-    "mac",
-    "100元",
-    "滴滴打车券20元"
-];
+app.use(express.static(__dirname + '/public'));  // express 管理静态资源分发  __dirname 正在执行的脚本目录
+app.use(require('cookie-parser')("cookieSecret12345"));  // 私钥,签名 必须是要引入cookie中间件
+app.use(require('body-parser')());
 
-app.get('/', function(req, res) {
-    res.charset =  'utf-8'; //默认编码 可html代替 <meta http-equiv="content-type" content="text/html;charset=gb2312">
-    res.render('home'); // render表示传送视图home.handlebars , 原生写法 res.end('读取文件返回的数据data')
+app.get('/', function(req,res){
+    /*var login = require('./js/login');*/
+    res.render('login', { layout: 'indexLayout',title: '登录'});  //更换布局文件
 });
 
-app.get('/prize', function(req,res){
-    var randomFortune =
-        fortuneCookies[Math.floor(Math.random() * fortuneCookies.length)];
-    res.render('prize', { fortune: randomFortune });
-});
-
-app.get('/blog', function(req,res){
-    var Blog = require('./js/blog');
+/*app.get('/blog', function(req,res){
+    var Blog = require('./serve-js/blog');
     var blogList = [];
     Blog.find(function(err, blogs){
         var  tempArr =[];
@@ -63,6 +60,68 @@ app.get('/blog', function(req,res){
          res.render('blog', { blogs: tempArr }); //必须放回调里！异步
     });
     //res.render('blog', { blogs: blogList });
+});*/
+
+app.use('/login', function(req,res){
+
+    res.set('Access-Control-Allow-Origin', req.headers.origin);   ////允许当前页面，那返回的信息
+    res.set('Access-Control-Allow-Credentials', true);  //允许当前页面，拿返回的cookie (这时 不可用用* 匹配 Allow-Origin)
+    res.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+    var account = req.body.account;
+    var password = req.body.password;
+    if( account == '8596' && password == "CHEN"){
+        res.cookie('account',account,{signed: true, httpOnly: true});
+        res.cookie('password',password,{signed: true, httpOnly: true});
+        res.json({
+            state: "loginSuccess",
+            href : "http://mejustme.duapp.com:18080/comment"
+        })
+    }else{
+        /* res.type('text/plain');*/
+        /*res.send("密码错误");*/
+        if(account == '859652049'){
+            res.json({
+                state: "pwdError",
+                msg : "密码错误"
+            })
+        }else{
+            res.json({
+                state: "accountError",
+                msg : "账号不存在"
+            })
+        }
+
+    }
+});
+
+app.use('/signup', function(req,res){
+
+});
+
+app.use('/comment', function(req,res){
+    for(var key in req.signedCookies){  // cookies 与signedCookies
+        console.log(key + req.signedCookies[key]);
+    }
+    res.render('comment', { layout: 'indexLayout' ,title: '评论'});
+});
+
+
+app.use('/ajax', function(req,res){
+    console.log('来着跨域请求',req.host + req.url);
+    /* for(var key in req.cookies){
+     console.log(key + req.cookies[key]);
+     }*/
+    /*  res.cookie('lulu2',10084108,{httpOnly:true});//httpOnly 服务器可读写，浏览器不可见
+     res.cookie('cqh1',888888,{signed:true});*/  // sigined签名
+    res.type('text/plain');
+    res.set('Access-Control-Allow-Origin', req.headers.origin);   ////允许当前页面，那返回的信息
+    res.set('Access-Control-Allow-Credentials', true);  //允许当前页面，拿返回的cookie (这时 不可用用* 匹配 Allow-Origin)
+    res.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+
+    console.log()
+    var account = req.body.account;
+    var password = req.body.password;
+    // res.send("you account:" + account +'\n' + "you password:" + password);
 });
 
 app.get('/505', function(req,res){
