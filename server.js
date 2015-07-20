@@ -5,7 +5,7 @@ var app = express();
 var handlebars = require('express3-handlebars') //  映入handlebar
     .create({
         defaultLayout:'indexLayout',
-        helpers: {                    //helpers,有s, 是section辅助函数
+        helpers: {                    //helpers, 是section辅助函数
             section: function(name, options){
                 if(!this._sections) this._sections = {};
                 this._sections[name] = options.fn(this);
@@ -18,7 +18,7 @@ app.engine('handlebars', handlebars.engine);  //添加引擎
 app.set('view engine', 'handlebars');  // 设置引擎
 
 app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口express 服务器端口
-// mongodb协议默认端口就是27017 同http为80
+
 //mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ", function(err){
 mongoose.connect("mongodb://localhost:27017/bae", function(err){
     if(!err){
@@ -32,51 +32,25 @@ app.use(express.static(__dirname + '/public'));  // express 管理静态资源�
 var cookieParser = require('cookie-parser');
 var mySecret = "cookieSecret12345";
 app.use(cookieParser(mySecret));  // 私钥,签名 必须是要引入cookie中间件
-app.use(require('body-parser')());
+app.use(require('body-parser')()); // 解析post参数中间件
+app.use(require('express-session')()); //session中间件
 
-app.get('/', function(req,res){
-    /*var login = require('./js/login');*/
-    res.render('login', { layout: 'indexLayout',title: '登录'});  //更换布局文件
+app.get('/', function(req,res,next){
+
+        res.render('login', { layout: 'indexLayout',title: '登录'});  //更换布局文件
+
 });
 
-/*app.get('/blog', function(req,res){
-    var Blog = require('./serve-js/blog');
-    var blogList = [];
-    Blog.find(function(err, blogs){
-        var  tempArr =[];
-        tempArr = blogs.map(function(blog){
-             // 不知道为什么blog.date = blog.date.toString().match(/\d+:\d+:\d+/)[0];无效
-             var  tempBlog = {}; //必须放里面，每次创造一个新的，否则数组中都是指向同一个的引用
-             tempBlog.title = blog.title;
-             tempBlog.content = blog.content;
-             tempBlog.date =  blog.date.toString().match(/\d+:\d+:\d+/)[0];
-             tempBlog.visited = blog.visited;
-             tempArr.push(tempBlog);
-             //match非全局匹配  返回的是数组[结果，正则表达式子表达式，index,原值]
-             //match全局匹/g ,返回也是数组，只有多个全匹配结果
-             //return blog; 必须返回该值才改变
-             return tempBlog;
-         });
-         //console.log(tempArr)
-         res.render('blog', { blogs: tempArr }); //必须放回调里！异步
-    });
-    //res.render('blog', { blogs: blogList });
-});*/
-
-app.use('/login', function(req,res){
-
-    res.set('Access-Control-Allow-Origin', req.headers.origin);   ////允许当前页面，那返回的信息
-    res.set('Access-Control-Allow-Credentials', true);  //允许当前页面，拿返回的cookie (这时 不可用用* 匹配 Allow-Origin)
-    res.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+app.post('/login', function(req,res){
     var inputAccount = req.body.account;
     var inputPassword = req.body.password;
+    res.cookie('account',inputAccount,{signed: true, httpOnly: true}); //签名+httpOnly
+    res.cookie('password',inputPassword,{signed: true, httpOnly: true});
 
     var Users = require('./serve-js/users');
     Users.find({account: inputAccount}, function(err, users){
         if(users.length == 1){
             if(users[0].password === inputPassword){
-                res.cookie('account',inputAccount,{signed: true, httpOnly: true});
-                res.cookie('password',inputPassword,{signed: true, httpOnly: true});
                 res.json({
                     action: "login",
                     state: "loginSuccess",
@@ -100,10 +74,8 @@ app.use('/login', function(req,res){
 
 });
 
-app.use('/signup', function(req,res){
-    res.set('Access-Control-Allow-Origin', req.headers.origin);   ////允许当前页面，那返回的信息
-    res.set('Access-Control-Allow-Credentials', true);  //允许当前页面，拿返回的cookie (这时 不可用用* 匹配 Allow-Origin)
-    res.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
+app.post('/signup', function(req,res){
+
     var inputAccount = req.body.account;
     var inputPassword = req.body.password;
     var Users = require('./serve-js/users');
@@ -138,62 +110,101 @@ app.use('/signup', function(req,res){
     });
 });
 
-app.use('/comment', function(req,res){
+app.use(function(req,res,next){   //以下都进行身份校验
     var inputSignedAccount = req.signedCookies.account;
     var inputSignedPassword = req.signedCookies.password;
-    var inputAccount = cookieParser.signedCookie(inputSignedAccount,mySecret);
-    var inputPassword = cookieParser.signedCookie(inputSignedPassword,mySecret);
-    console.log(inputAccount);
-    console.log(inputPassword);
     var Users = require('./serve-js/users');
-    Users.find({account: inputAccount},function(err,users){
-        if(users.length == 1 && users[0].password == inputPassword){
-            res.render('comment', { layout: 'indexLayout' ,title: '评论'});
-        }else{
-            res.redirect(303,'/');
-        }
-    })
+    if(inputSignedAccount != undefined && inputSignedPassword != undefined ){
+        var inputAccount = cookieParser.signedCookie(inputSignedAccount,mySecret);
+        var inputPassword = cookieParser.signedCookie(inputSignedPassword,mySecret);
+        Users.find({account: inputAccount},function(err,users){
+            if(users.length == 1 && users[0].password == inputPassword){
+                res.locals.account = inputAccount;  // 当前请求中保存账号
+                req.session.Account  = inputAccount; //session保存当前账号密码
+                req.session.Password  = inputPassword;
+                next();  //要next(),否则终止下面操作
+            }else{
+                res.redirect(303,'/');
+            }
+        })
+    }else{
+        res.redirect(303,'/');
+    }
+});
+
+app.use('/comment', function(req,res){
+    if(req.query.cookieSafe === "false"){
+        res.cookie('Account',req.session.Account); //给予验证，浏览器可查看修改
+        res.cookie('Password',req.session.Password);
+    }else{
+        res.cookie('Account', req.session.Account, {signed: true, httpOnly: true}); //给予验证，浏览器可查看修改
+        res.cookie('Password', req.session.Password, {signed: true, httpOnly: true});
+    }
+    var getRandomStr = require('./serve-js/getRandomStr.js');
+    req.session.token  = getRandomStr(10);  //产生随机10位token
+    res.render('comment', { layout: 'indexLayout' ,title: '评论', token: req.session.token});
+});
+
+app.get('/getComments', function(req,res){   /* ajax获取 评论数据*/
+    var Comments = require('./serve-js/comments.js');
+    var inputAccount = res.locals.account;
+    Comments.find({account: inputAccount}, function(err, comments){
+        res.setHeader('Cache-Control', 'no-cache');
+        res.json(comments);
+    });
+});
+
+app.post('/addComment', function(req,res){   //ajax(post)或者post跨域 动态提交 评论数据
+    var inputTitle = req.body.title;
+    var inputText = req.body.text;
+    var inputDate = req.body.date;
+    var inputUserImg = req.body.userImg;
+    var inputToken = req.body.token;
+    var inputAccount = res.locals.account;
+
+    if(req.session.token === inputToken || req.query.denyCsrf == "false"){   //默认开启token校验
+        var Comments = require('./serve-js/comments');
+        var newComment = new Comments();
+        newComment.account = inputAccount;
+        newComment.title = inputTitle;
+        newComment.text = inputText;
+        newComment.date = inputDate;
+        newComment.userImg = inputUserImg;
+
+        newComment.save(function(err){
+            if(err){
+                res.json({
+                    action: "addComment",
+                    state: "addCommentError",
+                    msg: "添加评论失败"
+                })
+            }else{
+                var Comments = require('./serve-js/comments.js');
+                Comments.find({account: inputAccount}, function(err, comments){
+                    res.json({
+                        action: "addComment",
+                        state: "addCommentSuccess",
+                        comments: comments
+                    })
+                });
+            }
+        })
+    }else{
+        res.json({
+            action: "addComment",
+            state: "addCommentError",
+            msg: "添加评论失败"
+        })
+    }
 
 });
 
-app.get('/getComments', function(req,res){   /* 获取comments数据*/
-    var comments = [{
-        "author": "one",
-        "text": "我的小鱼你醒了，\n还认识早晨吗？\n昨夜你曾经说，\n愿夜幕永不开启。\n你的香腮边轻轻滑落的，\n是你的泪，还是我的泪？\n初吻吻别的那个季节，\n不是已经哭过了吗？\n我的指尖还记忆着，\n你慌乱的心跳。\n温柔的体香里，\n那一缕长发飘飘。",
-        "date": "2015/7/20",
-        "userImg": "//g01.alibaba-inc.com/tfscom/TB1IFxiIpXXXXaOXFXXXXXXXXXX.tfsprivate_80x80"
-    }];
-    res.setHeader('Cache-Control', 'no-cache');
-    res.json(comments);
-});
-
-app.use('/addComment', function(req,res){   /*ajax 动态提交 comment数据*/
-    console.log('来着跨域请求',req.host + req.url);
-    /* for(var key in req.cookies){
-     console.log(key + req.cookies[key]);
-     }*/
-    /*  res.cookie('lulu2',10084108,{httpOnly:true});//httpOnly 服务器可读写，浏览器不可见
-     res.cookie('cqh1',888888,{signed:true});*/  // sigined签名
-    res.type('text/plain');
-    res.set('Access-Control-Allow-Origin', req.headers.origin);   ////允许当前页面，那返回的信息
-    res.set('Access-Control-Allow-Credentials', true);  //允许当前页面，拿返回的cookie (这时 不可用用* 匹配 Allow-Origin)
-    res.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS');
-
-    console.log()
-    var account = req.body.account;
-    var password = req.body.password;
-    // res.send("you account:" + account +'\n' + "you password:" + password);
-});
-
-// 404 catch-all handler (middleware)
 app.use(function(req, res, next){
-    res.status(404);  // 必须要自己写  等价原生 res.writeHead(200, {'content-Type': 'text/html'})
+    res.status(404);  // 必须要自己写
     res.render('404');
 });
 
-// 500 error handler (middleware)
 app.use(function(err, req, res, next){
-    console.error(err.stack);
     res.status(500);
     res.render('500');
 });

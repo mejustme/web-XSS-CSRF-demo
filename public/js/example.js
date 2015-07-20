@@ -4,7 +4,7 @@ var CommentBox = React.createClass({
   },
   loadCommentsFromServer: function() {
     $.ajax({
-      url: this.props.url,
+      url: "getComments",
       dataType: 'json',
       success: function(data) {
         this.setState({data: data});
@@ -19,7 +19,7 @@ var CommentBox = React.createClass({
     var newComments = comments.concat([comment]);
     this.setState({data: newComments});
     $.ajax({
-      url: '/addComment',
+      url: this.props.url,
       dataType: 'json',
       type: 'POST',
       data: comment,
@@ -33,7 +33,7 @@ var CommentBox = React.createClass({
   },
   componentDidMount: function() {
     this.loadCommentsFromServer();
-    setInterval(this.loadCommentsFromServer, this.props.pollInterval);
+   /* setInterval(this.loadCommentsFromServer, this.props.pollInterval); todo 增加结束条件*/
   },
   render: function() {
     return (
@@ -107,6 +107,6 @@ var CommentForm = React.createClass({
   }
 });
 React.render(
-  <CommentBox url="/getComments" pollInterval={2000}/>,
+  <CommentBox url="addComment?denyCsrf=false" pollInterval={2000}/>,  /*denyCsrf=false 测试*/
   document.getElementById('content')
 );
