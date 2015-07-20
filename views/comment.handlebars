@@ -1,3 +1,18 @@
-<h1>登录成功</h1>
-<h3>用户名：{{ account }}</h3>
-<h3>密码：{{ password }}</h3>
+{{#section 'index-css'}}  <!--自定义不同段落-->
+
+<link rel="stylesheet" href="/css/comment.css" />
+
+{{/section}}
+
+
+<div id="content"></div>
+
+
+{{#section 'index-script'}}
+    <script src="/js/react.js"></script>
+    <script src="/js/JSXTransformer.js"></script>
+    <script src="/js/jquery.js"></script>
+    <script type="text/jsx;harmony=true" src="/js/example.js"></script>
+{{/section}}
+
+

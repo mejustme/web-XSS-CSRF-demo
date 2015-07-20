@@ -70,7 +70,6 @@ $('.signup-button, .login-button').on('click',function(){
            error: function(){
                alert(msg)
            }
-
        });
 
    }

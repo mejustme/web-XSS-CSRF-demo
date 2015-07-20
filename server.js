@@ -30,9 +30,8 @@ mongoose.connect("mongodb://localhost:27017/bae", function(err){
 
 app.use(express.static(__dirname + '/public'));  // express 管理静态资源分发  __dirname 正在执行的脚本目录
 var cookieParser = require('cookie-parser');
-var mySecret = "cookieSecret12345"
+var mySecret = "cookieSecret12345";
 app.use(cookieParser(mySecret));  // 私钥,签名 必须是要引入cookie中间件
-
 app.use(require('body-parser')());
 
 app.get('/', function(req,res){
@@ -157,8 +156,18 @@ app.use('/comment', function(req,res){
 
 });
 
+app.get('/getComments', function(req,res){   /* 获取comments数据*/
+    var comments = [{
+        "author": "one",
+        "text": "我的小鱼你醒了，\n还认识早晨吗？\n昨夜你曾经说，\n愿夜幕永不开启。\n你的香腮边轻轻滑落的，\n是你的泪，还是我的泪？\n初吻吻别的那个季节，\n不是已经哭过了吗？\n我的指尖还记忆着，\n你慌乱的心跳。\n温柔的体香里，\n那一缕长发飘飘。",
+        "date": "2015/7/20",
+        "userImg": "//g01.alibaba-inc.com/tfscom/TB1IFxiIpXXXXaOXFXXXXXXXXXX.tfsprivate_80x80"
+    }];
+    res.setHeader('Cache-Control', 'no-cache');
+    res.json(comments);
+});
 
-app.use('/ajax', function(req,res){
+app.use('/addComment', function(req,res){   /*ajax 动态提交 comment数据*/
     console.log('来着跨域请求',req.host + req.url);
     /* for(var key in req.cookies){
      console.log(key + req.cookies[key]);

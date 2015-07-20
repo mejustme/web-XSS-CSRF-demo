@@ -1,0 +1,116 @@
+body {
+  background: #fff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+  padding: 30px;
+}
+
+a {
+  color: #4183c4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-family: "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
+  font-size: 12px;
+  margin: 0 2px;
+  padding: 0px 5px;
+}
+
+h1, h2, h3, h4 {
+  font-weight: bold;
+  margin: 0 0 15px;
+  padding: 0;
+}
+
+h1 {
+  border-bottom: 1px solid #ddd;
+  font-size: 2.5em;
+  font-weight: bold;
+  margin: 0 0 15px;
+  padding: 0;
+}
+.comment {
+  border-bottom: 1px solid #ddd;
+  margin-top: 10px;
+}
+.author_icon {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+}
+.author_name {
+  position: relative;
+  left: 10px;
+  top: -50px;
+  font-size: 25px;
+}
+.time {
+  float: right;
+}
+.user {
+  width: 300px;
+  height: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.user:focus {
+  outline: none;
+  border-color:#f60;
+}
+.userImg {
+  width: 100%;
+  height: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+  /*margin-left: 1%;*/
+}
+.userImg:focus {
+  outline: none;
+  border-color:#f60;
+}
+.text {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border-radius: 5px;
+  border-color: #ddd;
+  resize: none;
+  margin-top: 10px;
+  padding: 10px;
+}
+.text:focus {
+  outline: none;
+  border-color:#f60;
+}
+.btn {
+  width: 90px;
+  height: 30px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 14px;
+  background: #f60;
+  display: block;
+  margin-top: 10px;
+}
+.btn:focus {
+  outline: none;
+}
+.comment_text {
+  margin-bottom: 10px;
+}
