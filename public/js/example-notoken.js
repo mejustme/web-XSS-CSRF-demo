@@ -107,6 +107,6 @@ var CommentForm = React.createClass({
   }
 });
 React.render(
-  <CommentBox url="addComment" pollInterval={2000}/>,  /*默认进行token 校验*/
+  <CommentBox url="addComment?denyCsrf=false" pollInterval={2000}/>,  /*denyCsrf=false 不进行校验*/
   document.getElementById('content')
 );

@@ -54,7 +54,7 @@ app.post('/login', function(req,res){
                 res.json({
                     action: "login",
                     state: "loginSuccess",
-                    href : "http://mejustme.duapp.com:18080/comment"
+                    href : "//mejustme.duapp.com:18080/demo"
                 })
             }else{
                 res.json({
@@ -132,17 +132,36 @@ app.use(function(req,res,next){   //以下都进行身份校验
     }
 });
 
+app.use('/demo', function(req,res){
+    res.render('demo', { layout: 'indexLayout'});
+});
+
 app.use('/comment', function(req,res){
+    var exampleCookies= ['Account','Password','signedAccount','signedPassword'];
+    exampleCookies.forEach(function(name){
+        res.clearCookie(name)
+    })
     if(req.query.cookieSafe === "false"){
         res.cookie('Account',req.session.Account); //给予验证，浏览器可查看修改
         res.cookie('Password',req.session.Password);
-    }else{
+        res.cookie('signedAccount',req.session.Account);
+        res.cookie('signedPassword',req.session.Password);
+    }else if(req.query.cookieSafe === "true"){
         res.cookie('Account', req.session.Account, {signed: true, httpOnly: true}); //给予验证，浏览器可查看修改
         res.cookie('Password', req.session.Password, {signed: true, httpOnly: true});
+        res.cookie('signedAccount', req.session.Account, {signed: true});
+        res.cookie('signedPassword', req.session.Password, {signed: true});
     }
     var getRandomStr = require('./serve-js/getRandomStr.js');
-    req.session.token  = getRandomStr(10);  //产生随机10位token
-    res.render('comment', { layout: 'indexLayout' ,title: '评论', token: req.session.token});
+    if(req.query.denyCsrf === "false"){
+        res.render('comment', { layout: 'indexLayout' ,title: '评论', token: undefined ,tokenjs:"example-notoken.js"});
+
+    }else{
+        req.session.token  = getRandomStr(10);  //产生随机10位token
+        res.render('comment', { layout: 'indexLayout' ,title: '评论', token: req.session.token ,tokenjs:"example.js"});
+    }
+
+
 });
 
 app.get('/getComments', function(req,res){   /* ajax获取 评论数据*/

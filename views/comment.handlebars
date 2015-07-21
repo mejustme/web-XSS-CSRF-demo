@@ -6,13 +6,15 @@
 
 
 <div id="content"></div>
+{{#if token}}
 <input id="randomToken" type="text" style="display: none" value="{{token}}" />
+{{/if}}
 
 {{#section 'index-script'}}
     <script src="/js/react.js"></script>
     <script src="/js/JSXTransformer.js"></script>
     <script src="/js/jquery.js"></script>
-    <script type="text/jsx;harmony=true" src="/js/example.js"></script>
+    <script type="text/jsx;harmony=true" src="/js/{{tokenjs}}"></script>
 {{/section}}
 
 
