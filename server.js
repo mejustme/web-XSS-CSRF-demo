@@ -22,8 +22,9 @@ app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口expres
 mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ", function(err){
 //mongoose.connect("mongodb://localhost:27017/bae", function(err){
     if(!err){
-        console.log("成功连接数据库")
+        console.log("成功连接数据库");
     }else{
+        console.log("连接数据库失败");
         throw err;
     }
 }); // 连接数据库bea
@@ -78,8 +79,12 @@ app.post('/signup', function(req,res){
 
     var inputAccount = req.body.account;
     var inputPassword = req.body.password;
+
+    console.log("注册的用户名：" + inputAccount);
     var Users = require('./serve-js/users');
     Users.find({account: inputAccount}, function(err, users){
+        console.log("查询数据库用户");
+        console.log(users);
         if(users.length == 1){
             res.json({
                 action: "signup",
