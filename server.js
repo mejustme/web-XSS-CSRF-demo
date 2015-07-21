@@ -56,7 +56,8 @@ app.post('/login', function(req,res){
                 res.json({
                     action: "login",
                     state: "loginSuccess",
-                    href : "//mejustme.duapp.com:18080/demo"
+                   // href : "//mejustme.duapp.com:18080/demo"
+                    href : "//mejustme.duapp.com/demo"
                 })
             }else{
                 res.json({
