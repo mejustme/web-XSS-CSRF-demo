@@ -115,3 +115,12 @@ h1 {
 .comment_text {
   margin-bottom: 10px;
 }
+#attack{
+  display: block;
+  text-align: center;
+}
+#attack button{
+  background-color: #FF4040;
+  height: 2em;
+  color: white;
+}

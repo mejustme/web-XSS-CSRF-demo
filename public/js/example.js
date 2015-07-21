@@ -15,16 +15,13 @@ var CommentBox = React.createClass({
     });
   },
   handleCommentSubmit: function(comment) {
-    var comments = this.state.data;
-    var newComments = comments.concat([comment]);
-    this.setState({data: newComments});
     $.ajax({
       url: this.props.url,
       dataType: 'json',
       type: 'POST',
       data: comment,
       success: function(data) {
-        this.setState({data: data});
+        this.setState({data: data.comments});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
@@ -80,6 +77,7 @@ var Comment = React.createClass({
 var CommentForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
+    var token = $('#randomToken').val();
     var author = this.refs.author.getDOMNode().value.trim();
     var date = new Date().toLocaleDateString();
     var text =  this.refs.text.getDOMNode().value.trim();
@@ -87,7 +85,7 @@ var CommentForm = React.createClass({
     if(!author || !text) {
       return;
     }
-    this.props.onCommentSubmit({author: author,text: text,date: date,userImg: userImg});
+    this.props.onCommentSubmit({author: author,text: text,date: date,userImg: userImg, token: token });
     this.refs.text.getDOMNode().value = '';
     this.refs.author.getDOMNode().value = '';
     this.refs.userImg.getDOMNode().value = '';

@@ -145,7 +145,7 @@ app.use('/comment', function(req,res){
     var exampleCookies= ['Account','Password','signedAccount','signedPassword'];
     exampleCookies.forEach(function(name){
         res.clearCookie(name)
-    })
+    });
     if(req.query.cookieSafe === "false"){
         res.cookie('Account',req.session.Account); //给予验证，浏览器可查看修改
         res.cookie('Password',req.session.Password);
@@ -158,18 +158,27 @@ app.use('/comment', function(req,res){
         res.cookie('signedPassword', req.session.Password, {signed: true});
     }
     var getRandomStr = require('./serve-js/getRandomStr.js');
-    if(req.query.denyCsrf === "false"){
-        res.render('comment', { layout: 'indexLayout' ,title: '评论', token: undefined ,tokenjs:"example-notoken.js"});
+    var attack = (req.query.csrf === "true" ? true : false) ;
+    var config = (req.query.config === "true" ? true : false) ;
 
+    if(req.query.prueComment != 'true'){
+        if(req.query.denyCsrf === "false"){
+            res.render('comment', { layout: 'indexLayout', title: '评论', token: undefined ,tokenjs:"example-notoken.js", attack: attack});
+
+        }else{  /*denyCsrf=true 或者 无 都校验token*/
+            req.session.token  = getRandomStr(10);  //产生随机10位token
+            res.render('comment', { layout: 'indexLayout', title: '评论', token: req.session.token ,tokenjs:"example.js", attack: attack});
+        }
     }else{
-        req.session.token  = getRandomStr(10);  //产生随机10位token
-        res.render('comment', { layout: 'indexLayout' ,title: '评论', token: req.session.token ,tokenjs:"example.js"});
+        res.render('purecomment', { layout: 'indexLayout', title: '原生评论', config: config});
     }
+
 
 
 });
 
 app.get('/getComments', function(req,res){   /* ajax获取 评论数据*/
+
     var Comments = require('./serve-js/comments.js');
     var inputAccount = res.locals.account;
     Comments.find({account: inputAccount}, function(err, comments){
@@ -179,18 +188,47 @@ app.get('/getComments', function(req,res){   /* ajax获取 评论数据*/
 });
 
 app.post('/addComment', function(req,res){   //ajax(post)或者post跨域 动态提交 评论数据
-    var inputTitle = req.body.title;
+
+    var exampleCookies= ['Account','Password','signedAccount','signedPassword'];
+    exampleCookies.forEach(function(name){
+        res.clearCookie(name)
+    });
+    if(req.query.cookieSafe === "false"){
+        res.cookie('Account',req.session.Account); //给予验证，浏览器可查看修改
+        res.cookie('Password',req.session.Password);
+        res.cookie('signedAccount',req.session.Account);
+        res.cookie('signedPassword',req.session.Password);
+    }else if(req.query.cookieSafe === "true"){
+        res.cookie('Account', req.session.Account, {signed: true, httpOnly: true}); //给予验证，浏览器可查看修改
+        res.cookie('Password', req.session.Password, {signed: true, httpOnly: true});
+        res.cookie('signedAccount', req.session.Account, {signed: true});
+        res.cookie('signedPassword', req.session.Password, {signed: true});
+    }
+
+    var inputAuthor = req.body.author;
     var inputText = req.body.text;
     var inputDate = req.body.date;
     var inputUserImg = req.body.userImg;
     var inputToken = req.body.token;
     var inputAccount = res.locals.account;
 
+    if(inputDate == undefined){
+        inputDate ="2015/7/22";
+    }
+
+    if(req.query.serverClear == "true"){
+         clearInput = require('./serve-js/clearInput');
+         inputAuthor = clearInput(inputAuthor);
+         inputText = clearInput(inputText);
+         inputDate = clearInput(inputDate);
+         inputUserImg = clearInput(inputUserImg);
+    }
+
     if(req.session.token === inputToken || req.query.denyCsrf == "false"){   //默认开启token校验
         var Comments = require('./serve-js/comments');
         var newComment = new Comments();
         newComment.account = inputAccount;
-        newComment.title = inputTitle;
+        newComment.author = inputAuthor;
         newComment.text = inputText;
         newComment.date = inputDate;
         newComment.userImg = inputUserImg;

@@ -1,9 +1,12 @@
 {{#section 'index-css'}}  <!--自定义不同段落-->
 
-<link rel="stylesheet" href="/css/comment.css" />
+<link rel="stylesheet" href="/css/comment.css" xmlns="http://www.w3.org/1999/html"/>
 
 {{/section}}
 
+{{#if attack}}
+    <a id="attack" href="http://www.njugray.com/attack.html" target="_blank"><button>CSRF攻击，点这里</button></a>
+{{/if}}
 
 <div id="content"></div>
 {{#if token}}

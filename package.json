@@ -12,7 +12,8 @@
     "express": "~4.4.2",
     "express-session": "^1.11.3",
     "express3-handlebars": "~0.5.0",
-    "mongoose": "~4.0.8"
+    "mongoose": "~4.0.8",
+    "sanitizer": "^0.1.2"
   },
   "devDependencies": {
     "ejs": "^2.3.2",
