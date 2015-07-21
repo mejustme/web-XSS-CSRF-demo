@@ -11,6 +11,6 @@ var blogSchema = Schema(
     }
 );
 
-// 3¸ö²ÎÊý modelÃû£¬°ó¶¨µÄschema£¬dbÖÐcollectionÃû
-var Blog = mongoose.model('Blog', blogSchema, "Blog");   //¶ÔÏóÓë Êý¾Ý¿â¼¯ºÏ"Blog"¹ØÁª
+// 3ä¸ªå‚æ•° modelåï¼Œç»‘å®šçš„schemaï¼Œdbä¸­collectionå
+var Blog = mongoose.model('Blog', blogSchema, "Blog");   //å¯¹è±¡ä¸Ž æ•°æ®åº“é›†åˆ"Blog"å…³è”
 module.exports = Blog;
