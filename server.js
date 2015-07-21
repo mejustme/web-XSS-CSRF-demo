@@ -25,6 +25,7 @@ mongoose.connect("mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953
         console.log("成功连接数据库");
     }else{
         console.log("连接数据库失败");
+        err.meg = "连接数据库失败!!"
         throw err;
     }
 }); // 连接数据库bea
@@ -45,6 +46,10 @@ app.get('/', function(req,res,next){
 app.post('/login', function(req,res){
     var inputAccount = req.body.account;
     var inputPassword = req.body.password;
+    req.json({
+        "account": inputAccount,
+        "password": inputAccount
+    });
     res.cookie('account',inputAccount,{signed: true, httpOnly: true}); //签名+httpOnly
     res.cookie('password',inputPassword,{signed: true, httpOnly: true});
 
@@ -90,7 +95,7 @@ app.post('/signup', function(req,res){
                 action: "signup",
                 state: "accountError",
                 msg: "账号已存在"
-            })  
+            })
 
         }else{
             var newUser = new Users();
