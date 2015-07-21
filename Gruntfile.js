@@ -1,10 +1,10 @@
 /*
 module.exports = function(grunt){
 
-    //加载插件
+    //鍔犺浇鎻掍欢
     require('load-grunt-tasks')(grunt);
 
-    //配置插件
+    //閰嶇疆鎻掍欢
     grunt.initConfig({
         cafemocha: {
             all: {
@@ -14,12 +14,12 @@ module.exports = function(grunt){
         },
         exec: {
             ssh :{
-                cmd: 'ssh-add ~/.ssh/github'  //eval $(ssh-agent -s) 不让执行
+                cmd: 'ssh-add ~/.ssh/github'  //eval $(ssh-agent -s) 涓嶈鎵ц
 
             }
         }
     });
 
-    // 注册集合任务
+    // 娉ㄥ唽闆嗗悎浠诲姟
     grunt.registerTask('ssh' ,['exec:ssh'])
 };*/
