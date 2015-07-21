@@ -90,7 +90,7 @@ app.post('/signup', function(req,res){
                 action: "signup",
                 state: "accountError",
                 msg: "账号已存在"
-            })
+            })  
 
         }else{
             var newUser = new Users();
