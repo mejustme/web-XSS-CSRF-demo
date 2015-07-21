@@ -49,7 +49,6 @@ $('.signup-button, .login-button').on('click',function(){
        var action = $(this).hasClass('login-button') ? "login" : "signup";
        $.ajax({
            type: "POST",
-          // url: "http://mejustme.duapp.com:18080/" + action, 线上部署为180180端口，请求仍在80
            url: "http://mejustme.duapp.com/" + action,
            dataType: 'json',
            data: $(this).parent('form').serialize(),
