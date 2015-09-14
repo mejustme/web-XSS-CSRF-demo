@@ -1,0 +1,78 @@
+{{!< default}}
+
+{{! The comment above "< default" means - insert everything in this file into
+    the {body} of the default.hbs template, which contains our header/footer. }}
+
+{{! Everything inside the #post tags pulls data from the post }}
+{{#post}}
+
+    <!-- start post -->
+    <article id="{{id}}" class="post tag-feature tag-getting-started {{#if featured}}featured{{/if}}">
+        {{!-- 星标 --}}
+        {{#if featured}}
+        <div class="featured">
+            <i class="fa fa-star"></i>
+        </div>
+        {{/if}}
+        {{!-- 标题 --}}
+        <div class="post-head">
+            <h2 class="post-title">{{{title}}}</h2>
+            <div class="post-meta">
+                <span class="author">By {{author}}</span> •
+                <span class="date">{{date format="MMMM DD, YYYY"}}</span>
+            </div>
+        </div>
+        {{!-- 文章图片 --}}
+        {{#if image}}
+        <div class="featured-media">
+            <a href="{{url}}"><img src="{{image}}" alt="{{{title}}}"></a>
+        </div>
+        {{/if}}
+        {{!-- 内容 --}}
+        <div class="post-content">
+            {{content}}
+        </div>
+        {{!-- 前一篇和后一篇 --}}
+        <nav class="row">
+            {{#prev_post}}
+            <div class="col-md-6">
+                <a href="{{url}}" title="Previous Post"><i class="fa fa-chevron-left"></i> {{title}}</a>
+            </div>
+            {{/#prev_post}}
+            {{#next_post}}
+            <div class="col-md-6" style="text-align:right; float: right">
+                <a href="{{url}}" title="Previous Post">{{title}} <i class="fa fa-chevron-right"></i></a>
+            </div>
+            {{/#next_post}}
+        </nav>
+        {{!-- 标签 --}}
+        <footer class="post-footer clearfix">
+             <div class="pull-left tag-list">
+                <i class="fa fa-folder-open-o"></i>
+                {{tags}}
+            </div>
+        </footer>
+    </article>
+
+    <!-- start about the author -->
+    {{#author}}
+    <div class="about-author clearfix">
+        <a href="/author/{{slug}}/">
+            {{#if image}}<img src="{{image}}" alt="Author image" class="avatar pull-left">
+            {{else}}<img src="/shared/img/user-image.png" alt="Author image" class="avatar pull-left">{{/if}}
+        </a>
+        <div class="details">
+            <div class="author">
+            About <a href="/author/{{slug}}/">{{name}}</a>
+            </div>
+            <div class="meta-info">
+                {{#if location}}<span class="loaction"><i class="fa fa-home"></i>{{location}}</span>{{/if}}
+                {{#if website}}<span class="website"><i class="fa fa-globe"></i><a href="{{website}}" targer="_BLANK">Website</a></span>{{/if}}
+            </div>
+            {{#if bio}}<div class="bio">{{bio}}</div>{{/if}}
+        </div>
+    </div>
+    {{/author}}
+    <!-- end about the author -->
+
+{{/post}}
