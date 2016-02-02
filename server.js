@@ -20,7 +20,7 @@ app.set('view engine', 'handlebars');  // 设置引擎
 
 //app.set('port', process.env.PORT || 18080); //bae 上必须是这个端口express 服务器端口,但请求仍然是80
 app.set('port', process.env.PORT || 80); //本地
-
+//线上mongodb://1b78310ee3bd484bb12245c98099e686:eaf1de8fc5f44e2b953d4b2a192cf5bb@mongo.duapp.com:8908/LgLpMLllQMvVxjFozXeJ
 //mongoose.connect("线上数据库", function(err){
 mongoose.connect("mongodb://localhost:27017/bae", function(err){
     if(!err){
